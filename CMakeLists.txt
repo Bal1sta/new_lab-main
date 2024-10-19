@@ -29,7 +29,7 @@ add_test(NAME test_ip_filter COMMAND test_ip_filter)
 # Копирование ресурсов (если необходимо)
 set(RESOURCE_FILES 
     resources/ic.icns 
-    ip_filter.tsv  # Добавляем файл ip_filter.tsv
+    
 )
 
 foreach(RESOURCE ${RESOURCE_FILES})

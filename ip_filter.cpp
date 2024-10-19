@@ -106,7 +106,6 @@ void printIPsWithAnyByte(const std::vector<std::vector<std::string>>& ip_pool, i
 
 
 int main(){
-    setlocale(LC_ALL,"RUS");
     try {
         std::vector<std::vector<std::string>> ip_pool;
 

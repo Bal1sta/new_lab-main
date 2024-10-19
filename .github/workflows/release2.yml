@@ -28,11 +28,10 @@ jobs:
           brew update
           brew install boost cmake open-mpi
 
-      - name: Debug - Post install for macOS
-        run: echo "Dependencies installed for macOS"
-
-      - name: Create build directory for macOS
-        run: mkdir -p build
+      - name: Clean build directory for macOS
+        run: |
+          rm -rf build
+          mkdir build
 
       - name: Configure with CMake for macOS
         run: |
@@ -59,7 +58,6 @@ jobs:
 
       - name: Check if macOS package exists
         run: |
-
           if [ -f "./build/IFilterProject-0.1.0-Darwin.sh" ] || [ -f "./build/IFilterProject-0.1.0-Darwin.tar.gz" ]; then
             echo "macOS package exists."
           else
@@ -77,9 +75,6 @@ jobs:
           release_name: "Release macOS ${{ github.run_number }}"
           draft: false
           prerelease: false
-
-      - name: Debug - List contents of build directory before upload for macOS
-        run: ls -l ./build
 
       - name: Upload Release Asset (macOS)
         uses: actions/upload-release-asset@v1

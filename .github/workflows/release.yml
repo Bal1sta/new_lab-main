@@ -12,10 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Для решения ошибки с Check if
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repository #Получение кода из репозитория
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: true
@@ -23,21 +23,19 @@ jobs:
       - name: Debug - Start
         run: echo "Starting the job"
 
-      - name: Install dependencies # Установка зависимостей 
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libboost-all-dev \ #Библиотека BOOST
+            libboost-all-dev \
             cmake \
             openmpi-bin \
             libopenmpi-dev
 
-      # Отладка перед сборкой
-      - name: Debug - Post install
-        run: echo "Dependencies installed"
-
-      - name: Create build directory # Директория сборки
-        run: mkdir -p build
+      - name: Clean build directory
+        run: |
+          rm -rf build
+          mkdir build
 
       - name: Configure with CMake
         run: |
@@ -59,14 +57,12 @@ jobs:
           cd build
           cmake --build . --target package
 
-      # Отладка перед проверкой существования пакета
       - name: Debug - List contents of build directory after package creation
         run: ls -l ./build
 
-      # Проверка существования пакета для Linux
-      - name: Check if Linux package exists //  Шаг для проверки существования созданного пакета 
+      - name: Check if Linux package exists
         run: |
-          if [ -f "./build/IFilterProject-0.1.0-Linux.sh" ]; then  # Убедитесь, что имя файла правильное
+          if [ -f "./build/IFilterProject-0.1.0-Linux.sh" ]; then
             echo "Linux package exists."
           else
             echo "Linux package does not exist."
@@ -79,14 +75,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "release-${{ github.run_number }}"
-          release_name: "Release ${{ github.run_number }}"
+          tag_name: "release-linux-${{ github.run_number }}"
+          release_name: "Release Linux ${{ github.run_number }}"
           draft: false
           prerelease: false
-
-      # Отладка перед загрузкой ассета
-      - name: Debug - List contents of build directory before upload
-        run: ls -l ./build
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -94,13 +86,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/IFilterProject-0.1.0-Linux.sh  # Путь к созданному пакету 
-          asset_name: IFilterProject-0.1.0-Linux.sh 
+          asset_path: ./build/IFilterProject-0.1.0-Linux.sh
+          asset_name: IFilterProject-0.1.0-Linux.sh
           asset_content_type: application/x-sh
 
       - name: Debug - End
         run: echo "Ending the job"
-      
+
       - name: Debug - List all files in build directory at the end of the job
         run: |
           echo "Current directory:"
