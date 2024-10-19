@@ -1,101 +1,101 @@
-name: C++ CI
+name: C++ CI  # Название рабочего процесса CI для C++
 
-on:
-  push:
-    branches:
-      - main
-      - feature/github_actions
+on:  # Указываем условия, при которых запускается процесс
+  push:  # Запускается при пуше в репозиторий
+    branches:  # Указываем ветки, на которые будет реагировать процесс
+      - main  # Основная ветка
+      - feature/github_actions  # Ветка для работы с GitHub Actions
 
-permissions:
-  contents: write
+permissions:  # Устанавливаем разрешения для действий
+  contents: write  # Разрешение на запись содержимого репозитория
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+jobs:  # Определяем задачи, которые будут выполняться в процессе
+  build:  # Имя задачи
+    runs-on: ubuntu-latest  # Указываем, что задача будет выполняться на последней версии Ubuntu
+    timeout-minutes: 60  # Устанавливаем тайм-аут выполнения задачи в 60 минут
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    steps:  # Определяем шаги, которые будут выполняться в задаче
+      - name: Checkout repository  # Шаг для получения кода из репозитория
+        uses: actions/checkout@v3  # Используем действие для проверки кода
         with:
-          submodules: true
+          submodules: true  # Проверяем подмодули репозитория
 
-      - name: Debug - Start
-        run: echo "Starting the job"
+      - name: Debug - Start  # Шаг для отладки (начало работы)
+        run: echo "Starting the job"  # Выводим сообщение о начале работы
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libboost-all-dev \
-            cmake \
-            openmpi-bin \
-            libopenmpi-dev
+      - name: Install dependencies  # Шаг для установки зависимостей
+        run: |  # Используем многострочный скрипт
+          sudo apt-get update  # Обновляем список пакетов
+          sudo apt-get install -y \  # Устанавливаем необходимые пакеты без подтверждения
+            libboost-all-dev \  # Библиотека Boost для C++
+            cmake \  # CMake для сборки проекта
+            openmpi-bin \  # OpenMPI для параллельных вычислений
+            libopenmpi-dev  # Разработка OpenMPI
 
-      - name: Clean build directory
-        run: |
-          rm -rf build
-          mkdir build
+      - name: Clean build directory  # Шаг для очистки директории сборки
+        run: |  
+          rm -rf build  # Удаляем старую директорию сборки, если она существует
+          mkdir build  # Создаем новую директорию сборки
 
-      - name: Configure with CMake
-        run: |
-          cd build
-          cmake .. -DPATCH_VERSION=${{ github.run_number }}
-          
-      - name: Build the project
-        run: |
-          cd build
-          cmake --build .
+      - name: Configure with CMake  # Шаг для конфигурации проекта с помощью CMake
+        run: |  
+          cd build  # Переходим в директорию сборки
+          cmake .. -DPATCH_VERSION=${{ github.run_number }}  # Запускаем CMake с указанием номера сборки как версии патча
 
-      - name: Run tests
-        run: |
-          cd build
-          cmake --build . --target test
+      - name: Build the project  # Шаг для сборки проекта
+        run: |  
+          cd build  # Переходим в директорию сборки
+          cmake --build .  # Запускаем сборку проекта
 
-      - name: Create package
-        run: |
-          cd build
-          cmake --build . --target package
+      - name: Run tests  # Шаг для запуска тестов
+        run: |  
+          cd build  # Переходим в директорию сборки
+          cmake --build . --target test  # Запускаем тесты, определенные в проекте
 
-      - name: Debug - List contents of build directory after package creation
-        run: ls -l ./build
+      - name: Create package  # Шаг для создания пакета проекта
+        run: |  
+          cd build  # Переходим в директорию сборки
+          cmake --build . --target package  # Создаем пакет проекта
 
-      - name: Check if Linux package exists
-        run: |
-          if [ -f "./build/IFilterProject-0.1.0-Linux.sh" ]; then
-            echo "Linux package exists."
-          else
-            echo "Linux package does not exist."
-            exit 1
-          fi
+      - name: Debug - List contents of build directory after package creation  # Шаг для отладки (вывод содержимого директории после создания пакета)
+        run: ls -l ./build  # Выводим список файлов в директории сборки
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Check if Linux package exists  # Шаг для проверки существования созданного пакета 
+        run: |  
+          if [ -f "./build/IFilterProject-0.1.0-Linux.sh" ]; then   # Проверяем, существует ли файл пакета 
+            echo "Linux package exists."   # Если существует, выводим сообщение 
+          else  
+            echo "Linux package does not exist."   # Если не существует, выводим сообщение 
+            exit 1   # Завершаем процесс с ошибкой 
+          fi  
+
+      - name: Create Release   # Шаг для создания релиза на GitHub 
+        id: create_release   # Устанавливаем идентификатор шага 
+        uses: actions/create-release@v1   # Используем действие для создания релиза 
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Используем токен доступа к GitHub 
         with:
-          tag_name: "release-linux-${{ github.run_number }}"
-          release_name: "Release Linux ${{ github.run_number }}"
-          draft: false
-          prerelease: false
+          tag_name: "release-linux-${{ github.run_number }}"   # Указываем имя тега релиза 
+          release_name: "Release Linux ${{ github.run_number }}"   # Указываем имя релиза 
+          draft: false   # Не делаем релиз черновиком 
+          prerelease: false   # Не делаем релиз предварительным 
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload Release Asset   # Шаг для загрузки ассета релиза 
+        uses: actions/upload-release-asset@v1   # Используем действие для загрузки ассета 
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Используем токен доступа к GitHub 
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/IFilterProject-0.1.0-Linux.sh
-          asset_name: IFilterProject-0.1.0-Linux.sh
-          asset_content_type: application/x-sh
+          upload_url: ${{ steps.create_release.outputs.upload_url }}   # URL для загрузки ассета 
+          asset_path: ./build/IFilterProject-0.1.0-Linux.sh   # Путь к созданному пакету 
+          asset_name: IFilterProject-0.1.0-Linux.sh   # Имя загружаемого пакета 
+          asset_content_type: application/x-sh   # Тип содержимого ассета 
 
-      - name: Debug - End
-        run: echo "Ending the job"
+      - name: Debug - End   # Шаг для отладки (конец работы)
+        run: echo "Ending the job"   # Выводим сообщение о завершении работы 
 
-      - name: Debug - List all files in build directory at the end of the job
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "List of files in build directory:"
-          ls -la ./build
+      - name: Debug - List all files in build directory at the end of the job   # Шаг для отладки (вывод всех файлов в директории после завершения работы)
+        run: |  
+          echo "Current directory:"   # Выводим текущую директорию 
+          pwd   // Выводим путь к текущей директории 
+          echo "List of files in build directory:"   // Сообщение о выводе списка файлов в директории сборки 
+          ls -la ./build   // Выводим список всех файлов в директории сборки с подробной информацией 

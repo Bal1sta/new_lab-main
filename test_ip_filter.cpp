@@ -1,29 +1,29 @@
-#define BOOST_TEST_MODULE PrintIPTests
-#include <boost/test/included/unit_test.hpp>
-#include <sstream>
-#include <vector>
-#include <string>
+#define BOOST_TEST_MODULE PrintIPTests // Определяем модуль тестирования для Boost.Test
+#include <boost/test/included/unit_test.hpp> // Подключаем библиотеку Boost.Test
+#include <sstream> // Для работы с потоками строк
+#include <vector> // Для использования векторов
+#include <string> // Для работы со строками
 
 // Функция для печати IP-адресов с первым и вторым байтами
 void printIPsWithFirstAndSecondByte(const std::vector<std::vector<std::string>>& ip_pool, int first_byte, int second_byte) {
-    for (const auto& ip : ip_pool) {
+    for (const auto& ip : ip_pool) { // Проходим по каждому IP-адресу в пуле
+        // Проверяем, что у IP-адреса есть как минимум 2 части и сравниваем их с заданными байтами
         if (ip.size() >= 2 && std::stoi(ip[0]) == first_byte && std::stoi(ip[1]) == second_byte) {
-            for (size_t i = 0; i < ip.size(); ++i) {
+            for (size_t i = 0; i < ip.size(); ++i) { // Проходим по частям IP-адреса
                 if (i != 0) {
-                    std::cout << ".";
+                    std::cout << "."; // Выводим точку перед каждой частью, кроме первой
                 }
-                std::cout << ip[i];
+                std::cout << ip[i]; // Выводим текущую часть IP-адреса
             }
             std::cout << std::endl; // Переход на новую строку после каждого адреса
         }
     }
 }
 
-
 // Тесты для функции printIPsWithFirstAndSecondByte
 BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte) {
-    std::ostringstream output;
-    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер
+    std::ostringstream output; // Создаем поток для захвата вывода
+    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер вывода
 
     // Подготовка данных для тестирования
     std::vector<std::vector<std::string>> ip_pool = {
@@ -36,35 +36,35 @@ BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte) {
 
     // Вызов функции с параметрами 192 и 168
     printIPsWithFirstAndSecondByte(ip_pool, 192, 168);
-    BOOST_CHECK_EQUAL(output.str(), "192.168.1.1\n192.168.1.2\n");
+    BOOST_CHECK_EQUAL(output.str(), "192.168.1.1\n192.168.1.2\n"); // Проверяем ожидаемый вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Проверка с первым байтом 10 и вторым 0
     printIPsWithFirstAndSecondByte(ip_pool, 10, 0);
-    BOOST_CHECK_EQUAL(output.str(), "10.0.0.1\n10.0.0.2\n");
+    BOOST_CHECK_EQUAL(output.str(), "10.0.0.1\n10.0.0.2\n"); // Проверяем ожидаемый вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Проверка с первым байтом 172 и вторым 16
     printIPsWithFirstAndSecondByte(ip_pool, 172, 16);
-    BOOST_CHECK_EQUAL(output.str(), "172.16.0.1\n");
+    BOOST_CHECK_EQUAL(output.str(), "172.16.0.1\n"); // Проверяем ожидаемый вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Проверка с параметрами, которые не совпадают ни с одним IP
     printIPsWithFirstAndSecondByte(ip_pool, 8, 8);
     BOOST_CHECK_EQUAL(output.str(), ""); // Ожидаем пустой вывод
 
-    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер
+    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер вывода
 }
 
 BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte_AdditionalCases) {
-    std::ostringstream output;
-    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер
+    std::ostringstream output; // Создаем поток для захвата вывода
+    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер вывода
 
     // Подготовка данных для тестирования
     std::vector<std::vector<std::string>> ip_pool = {
@@ -80,20 +80,19 @@ BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte_AdditionalCases) {
     BOOST_CHECK_EQUAL(output.str(), ""); // Ожидаем пустой вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Вызов функции с пустым пулом IP-адресов
     std::vector<std::vector<std::string>> empty_ip_pool;
     printIPsWithFirstAndSecondByte(empty_ip_pool, 192, 168);
     BOOST_CHECK_EQUAL(output.str(), ""); // Ожидаем пустой вывод
 
-    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер
-
+    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер вывода
 }
 
 BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte_ExtraCases) {
-    std::ostringstream output;
-    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер
+    std::ostringstream output; // Создаем поток для захвата вывода
+    auto cout_buf = std::cout.rdbuf(output.rdbuf()); // Сохраняем старый буфер вывода
 
     // Подготовка данных для тестирования
     std::vector<std::vector<std::string>> ip_pool = {
@@ -109,18 +108,18 @@ BOOST_AUTO_TEST_CASE(TestPrintIPsWithFirstAndSecondByte_ExtraCases) {
     BOOST_CHECK_EQUAL(output.str(), "192.168.1.1\n192.168.1.2\n"); // Ожидаем вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Вызов функции с первым байтом 10 и вторым 1 (ожидаем пустой вывод)
     printIPsWithFirstAndSecondByte(ip_pool, 10, 1);
     BOOST_CHECK_EQUAL(output.str(), ""); // Ожидаем пустой вывод
 
     output.str(""); // Сброс вывода для следующего теста
-    output.clear();
+    output.clear(); // Очищаем поток
 
     // Вызов функции с первым байтом 172 и вторым 16
     printIPsWithFirstAndSecondByte(ip_pool, 172, 16);
     BOOST_CHECK_EQUAL(output.str(), "172.16.0.1\n"); // Ожидаем вывод
 
-    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер
+    std::cout.rdbuf(cout_buf); // Восстанавливаем старый буфер вывода
 }
