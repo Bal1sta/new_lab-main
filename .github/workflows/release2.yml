@@ -1,97 +1,97 @@
-name: C++ CI  # Название рабочего процесса CI для C++
+name: C++ CI
 
-on:  # Указываем условия, при которых запускается процесс
-  push:  # Запускается при пуше в репозиторий
-    branches:  # Указываем ветки, на которые будет реагировать процесс
-      - main  # Основная ветка
-      - feature/github_actions  # Ветка для работы с GitHub Actions
+on:
+  push:
+    branches:
+      - main
+      - feature/github_actions
 
-permissions:  # Устанавливаем разрешения для действий
-  contents: write  # Разрешение на запись содержимого репозитория
+permissions:
+  contents: write
 
-jobs:  # Определяем задачи, которые будут выполняться в процессе
-  build-mac:  # Имя задачи для сборки на macOS
-    runs-on: macos-latest  # Указываем, что задача будет выполняться на последней версии macOS
-    timeout-minutes: 60  # Устанавливаем тайм-аут выполнения задачи в 60 минут
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    timeout-minutes: 60
 
-    steps:  # Определяем шаги, которые будут выполняться в задаче
-      - name: Checkout repository  # Шаг для получения кода из репозитория
-        uses: actions/checkout@v3  # Используем действие для проверки кода
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          submodules: true  # Проверяем подмодули репозитория
+          submodules: true
 
-      - name: Debug - Start for macOS  # Шаг для отладки (начало работы)
-        run: echo "Starting the job for macOS"  # Выводим сообщение о начале работы
+      - name: Debug - Start for macOS
+        run: echo "Starting the job for macOS"
 
-      - name: Install dependencies on macOS  # Шаг для установки зависимостей на macOS
-        run: |  # Используем многострочный скрипт
-          brew update  # Обновляем Homebrew (менеджер пакетов для macOS)
-          brew install boost cmake open-mpi  # Устанавливаем необходимые пакеты Boost, CMake и OpenMPI
+      - name: Install dependencies on macOS
+        run: |
+          brew update
+          brew install boost cmake open-mpi
 
-      - name: Clean build directory for macOS  # Шаг для очистки директории сборки на macOS
-        run: |  
-          rm -rf build  # Удаляем старую директорию сборки, если она существует
-          mkdir build  # Создаем новую директорию сборки
+      - name: Clean build directory for macOS
+        run: |
+          rm -rf build
+          mkdir build
 
-      - name: Configure with CMake for macOS  # Шаг для конфигурации проекта с помощью CMake на macOS
-        run: |  
-          cd build  # Переходим в директорию сборки
-          cmake .. -DPATCH_VERSION=${{ github.run_number }}  # Запускаем CMake с указанием номера сборки как версии патча
+      - name: Configure with CMake for macOS
+        run: |
+          cd build
+          cmake .. -DPATCH_VERSION=${{ github.run_number }}
 
-      - name: Build the project for macOS  # Шаг для сборки проекта на macOS
-        run: |  
-          cd build  # Переходим в директорию сборки
-          cmake --build .  # Запускаем сборку проекта
+      - name: Build the project for macOS
+        run: |
+          cd build
+          cmake --build .
 
-      - name: Run tests for macOS  # Шаг для запуска тестов на macOS
-        run: |  
-          cd build  # Переходим в директорию сборки
-          cmake --build . --target test  # Запускаем тесты, определенные в проекте
+      - name: Run tests for macOS
+        run: |
+          cd build
+          cmake --build . --target test
 
-      - name: Create package for macOS  # Шаг для создания пакета проекта на macOS
-        run: |  
-          cd build  # Переходим в директорию сборки
-          cmake --build . --target package  # Создаем пакет проекта
+      - name: Create package for macOS
+        run: |
+          cd build
+          cmake --build . --target package
 
-      - name: Debug - List contents of build directory after package creation for macOS  # Шаг для отладки (вывод содержимого директории после создания пакета)
-        run: ls -l ./build  # Выводим список файлов в директории сборки
+      - name: Debug - List contents of build directory after package creation for macOS
+        run: ls -l ./build
 
-      - name: Check if macOS package exists  # Шаг для проверки существования созданного пакета 
-        run: |  
-          if [ -f "./build/IFilterProject-0.1.0-Darwin.sh" ] || [ -f "./build/IFilterProject-0.1.0-Darwin.tar.gz" ]; then   # Проверяем, существует ли файл пакета 
-            echo "macOS package exists."   # Если существует, выводим сообщение 
-          else  
-            echo "macOS package does not exist."   # Если не существует, выводим сообщение 
-            exit 1   # Завершаем процесс с ошибкой 
-          fi  
+      - name: Check if macOS package exists
+        run: |
+          if [ -f "./build/IFilterProject-0.1.0-Darwin.sh" ] || [ -f "./build/IFilterProject-0.1.0-Darwin.tar.gz" ]; then
+            echo "macOS package exists."
+          else
+            echo "macOS package does not exist."
+            exit 1
+          fi
 
-      - name: Create Release for macOS   # Шаг для создания релиза на GitHub для macOS 
-        id: create_release_macos   # Устанавливаем идентификатор шага 
-        uses: actions/create-release@v1   # Используем действие для создания релиза 
+      - name: Create Release for macOS
+        id: create_release_macos
+        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Используем токен доступа к GitHub 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "release-macos-${{ github.run_number }}"   # Указываем имя тега релиза 
-          release_name: "Release macOS ${{ github.run_number }}"   # Указываем имя релиза 
-          draft: false   # Не делаем релиз черновиком 
-          prerelease: false   # Не делаем релиз предварительным 
+          tag_name: "release-macos-${{ github.run_number }}"
+          release_name: "Release macOS ${{ github.run_number }}"
+          draft: false
+          prerelease: false
 
-      - name: Upload Release Asset (macOS)   # Шаг для загрузки ассета релиза на GitHub 
-        uses: actions/upload-release-asset@v1   # Используем действие для загрузки ассета 
+      - name: Upload Release Asset (macOS)
+        uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Используем токен доступа к GitHub 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release_macos.outputs.upload_url }}   # URL для загрузки ассета 
-          asset_path: ./build/IFilterProject-0.1.0-Darwin.tar.gz   # Путь к созданному пакету 
-          asset_name: IFilterProject-0.1.0-Darwin.tar.gz   # Имя загружаемого пакета 
-          asset_content_type: application/gzip   # Тип содержимого ассета 
+          upload_url: ${{ steps.create_release_macos.outputs.upload_url }}
+          asset_path: ./build/IFilterProject-0.1.0-Darwin.tar.gz
+          asset_name: IFilterProject-0.1.0-Darwin.tar.gz
+          asset_content_type: application/gzip
 
-      - name: Debug - End for macOS   # Шаг для отладки (конец работы)
-        run: echo "Ending the job for macOS"   # Выводим сообщение о завершении работы 
+      - name: Debug - End for macOS
+        run: echo "Ending the job for macOS"
 
-      - name: Debug - List all files in build directory at the end of the job for macOS   # Шаг для отладки (вывод всех файлов в директории после завершения работы)
-        run: |  
-          echo "Current directory:"   # Выводим текущую директорию 
-          pwd   // Выводим путь к текущей директории 
-          echo "List of files in build directory:"   // Сообщение о выводе списка файлов в директории сборки 
-          ls -la ./build   // Выводим список всех файлов в директории сборки с подробной информацией 
+      - name: Debug - List all files in build directory at the end of the job for macOS
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "List of files in build directory:"
+          ls -la ./build
